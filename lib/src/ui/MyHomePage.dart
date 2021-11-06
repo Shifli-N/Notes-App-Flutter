@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/constants/ColorsConstant.dart';
 import 'package:notes_app/constants/TextStyleConstant.dart';
-import 'package:notes_app/databases/dbClasses/NoteDatabase.dart';
 import 'package:notes_app/sampleDataJSON/JsonForLoadData.dart';
-import 'package:notes_app/widgets/NotesWidgets.dart';
+import 'package:notes_app/src/bloc/NoteBloc.dart';
+import 'package:notes_app/src/ui/NotesWidgets.dart';
 
 
 class MyHomePage extends StatefulWidget {
@@ -16,7 +15,9 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
 
-  late NoteDatabase db;
+  late dynamic db;
+
+  NoteBloc noteBloc = NoteBloc.getInstance();
 
   Map<String, dynamic> temp_data = jsonFormatDummyData[0];
   //List<Map<String, dynamic>> listOfTempData = jsonFormatDummyData;
@@ -28,9 +29,9 @@ class _MyHomePageState extends State<MyHomePage> {
     print('home initState');
 
     // listOfTempData.addAll(jsonFormatDummyData);
-    //
-    // //DB connections
-    getDbConnection();
+
+    // notes in Db
+    showAllNotesInDb();
   }
 
   @override
@@ -50,41 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
         body: Container(
           padding: EdgeInsets.symmetric(horizontal: 10),
-          /*child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height:20,),
-              Text("Today", style:mDayTextStyle),
-              SizedBox(height: 15,),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: 5),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Note, Today TODO's", style:mHeadingTextStyle),
-                    SizedBox(height: 8,),
-                    ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: 20,
-                        maxHeight: 80
-                      ),
-                      child: Text("Jogging, Yoga, Breakfast, Brunch, Movie Time-Jogging, Yoga, Breakfast, Brunch, Movie Time",
-                        style: mNoteTextStyle,
-                        maxLines: 6,
-                        overflow: TextOverflow.ellipsis,
-                      )
-                    ),
-                    SizedBox(height: 16,),
-                    Divider(height: 1, thickness: 1, color: Colors.black12,)
-                  ],
-                )//
-              ),
-            ],
-          ),*/
-
           child: showListIfContains(listOfTempData),
-
-
         ),
 
         floatingActionButton: FloatingActionButton(
@@ -135,8 +102,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-
-
   List<Widget> populateNotesWidget(List<String> headings, List<String> notes) {
     List<Widget> widgetList = [];
 
@@ -157,8 +122,9 @@ class _MyHomePageState extends State<MyHomePage> {
     return widgetList;
   }
 
+
   Future<void> showAllNotesInDb() async{
-    var noteList = await this.db.noteDAO.showAllNotes();
+    var noteList = await noteBloc.showNotesInDb();
 
     var heading = noteList.map((e) => e.heading).toList();
     var note = noteList.map((e) => e.notes).toList();
@@ -180,10 +146,4 @@ class _MyHomePageState extends State<MyHomePage> {
     print('listOfTempData - ${listOfTempData.length}');
   }
 
-
-  void getDbConnection() async{
-    this.db = await $FloorNoteDatabase.databaseBuilder("NoteDatabase.db").build();
-
-    await showAllNotesInDb();
-  }
 }

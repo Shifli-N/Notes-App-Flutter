@@ -1,6 +1,6 @@
 import 'package:floor/floor.dart';
 import 'dart:async';
-import 'package:notes_app/databases/models/Note.dart';
+import 'package:notes_app/src/models/Note.dart';
 
 @dao
 abstract class NoteDAO{

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:notes_app/constants/ColorsConstant.dart';
 import 'package:notes_app/constants/TextStyleConstant.dart';
-import 'package:notes_app/databases/dbClasses/NoteDatabase.dart';
-import 'package:notes_app/databases/models/Note.dart';
+import 'package:notes_app/src/bloc/NoteBloc.dart';
+import 'package:notes_app/src/models/Note.dart';
 
 class AddNewNotesPage extends StatefulWidget {
   const AddNewNotesPage({Key? key}) : super(key: key);
@@ -14,7 +13,9 @@ class AddNewNotesPage extends StatefulWidget {
 class _AddNewNotesPageState extends State<AddNewNotesPage> {
   late BuildContext mContext;
 
-  late NoteDatabase db;
+  NoteBloc noteBloc = NoteBloc.getInstance();
+
+  late dynamic db;
 
   bool alreadyOneAdded = false;
 
@@ -27,12 +28,13 @@ class _AddNewNotesPageState extends State<AddNewNotesPage> {
     _headingTextFieldController = TextEditingController();
     _noteTextFieldController = TextEditingController();
 
-    $FloorNoteDatabase.databaseBuilder("NoteDatabase.db")
+   /* $FloorNoteDatabase.databaseBuilder("NoteDatabase.db")
         .build()
         .then((value) async {
           this.db = value;
         }
-    );
+    );*/
+    
   }
 
   @override
@@ -182,13 +184,17 @@ class _AddNewNotesPageState extends State<AddNewNotesPage> {
       _noteTextFieldController.clear();
 
 
-      saveNotesInDb(heading: head, note: note);
-      showNotesInDb();
+      /*saveNotesInDb(heading: head, note: note);
+      showNotesInDb();*/
+      
+      noteBloc.saveNotesInDb(heading: head, note: note);
+      showNotesList();
+      
 
       alreadyOneAdded = true;
     }else{
       print('Text Field is empty');
-      showNotesInDb();
+      showNotesList();
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text("Please Fill all Fields"),
@@ -201,41 +207,15 @@ class _AddNewNotesPageState extends State<AddNewNotesPage> {
   }
 
 
-  void saveNotesInDb({required String heading, required String note}) async{
+  void showNotesList() async{
     try{
 
-      /*var tempData = {
-        "heading" : "Test 2",
-        "notes" : "Auto upgrade testing",
-        "date":"${DateTime.now().millisecondsSinceEpoch}"
-      };*/
+      List<Note> tempResult = await noteBloc.showNotesInDb();
+      print('result - \n $tempResult');
 
-      var tempData = {
-        "heading" : "$heading",
-        "notes" : "$note",
-        "date":"${DateTime.now().millisecondsSinceEpoch}"
-      };
-
-      var notes = Note.formJson(tempData);
-
-      await this.db.noteDAO.insertNote(notes);
-
-    }catch(e, s){
-      print('$e');
-      print(s);
-    }
-  }
-
-
-  void showNotesInDb() async{
-    try{
-
-      List<Note> tempResult = await this.db.noteDAO.showAllNotes();
-      //print('result $tempResult');
-
-      tempResult.forEach((element) {
+      /*tempResult.forEach((element) {
         print('${element.toString()}');
-      });
+      });*/
 
     }catch(e, s){
       print(e);
