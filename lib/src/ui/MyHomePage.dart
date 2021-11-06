@@ -26,11 +26,20 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
+    super.initState();
     print('home initState');
+  }
+
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    print('didChangeDependencies is working');
 
     // listOfTempData.addAll(jsonFormatDummyData);
 
-    // notes in Db
+    //notes in db
     showAllNotesInDb();
   }
 
